@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Add TBS drivers to the build system
+cp -f v4l/* ../media_build/v4l/
+
+if [ "$?" -eq 1 ]; then
+  echo -en "
+\E[1;33;44m
+Faild to insert TBS drivers into the build system.
+
+Aborting...
+\E[0m
+
+"
+  exit 1
+fi
+
+cp -f dvb-frontends/* ../media_build/linux/drivers/media/dvb-frontends/
+
+if [ "$?" -eq 1 ]; then
+  echo -en "
+\E[1;33;44m
+Faild to insert TBS drivers into the build system.
+
+Aborting...
+\E[0m
+
+"
+  exit 1
+fi
+
+mkdir -p ../media_build/linux/drivers/media/common/saa716x
+cp -f saa716x/* ../media_build/linux/drivers/media/common/saa716x/
+
+if [ "$?" -eq 1 ]; then
+echo -en "
+\E[1;33;44m
+Faild to insert TBS drivers into the build system.
+
+Aborting...
+\E[0m
+
+"
+exit 1
+fi
+
+sed -i "$ a\
+obj-\$(CONFIG_SAA716X_CORE) += saa716x/" ../media_build/linux/drivers/media/common/Makefile
+sed -i "$ a\
+source \"drivers/media/common/saa716x/Kconfig\"" ../media_build/linux/drivers/media/common/Kconfig
+sed -i "$ a\
+obj-\$(CONFIG_DVB_TBS6680FE) += tbs6680fe.o" ../media_build/linux/drivers/media/dvb-frontends/Makefile
+sed -i "$ a\
+tbs6680fe-objs += kmem_wrap.o tbs6680fe_driver.o" ../media_build/linux/drivers/media/dvb-frontends/Makefile
+
+cd ../media_build && patch -p1 < ../v4l-tbs/6680_patch && cd ../v4l-tbs
+
+if [ "$?" -eq 1 ]; then
+  echo -en "
+\E[1;33;44m
+Faild to insert TBS drivers into the build system.
+
+Aborting...
+\E[0m
+
+"
+  exit 1
+fi
+
+# Compile prep
+if [ `getconf LONG_BIT` = "64" ]
+then
+  echo "
+Setting up TBS drivers for a amd64 system
+"
+  cd ../media_build && sh v4l/tbs-x86_64.sh
+  if [ "$?" -eq 1 ]; then
+    echo -en "
+\E[1;33;44m
+Faild to setup TBS drivers for amd64 system.
+
+Aborting...
+\E[0m
+
+"
+    cd ../v4l-tbs &&  exit 1
+  fi
+  cd ../v4l-tbs
+else
+  echo "
+Setting up TBS drivers for a i386 system
+"
+  cd ../media_build && sh v4l/tbs-x86_r3.sh
+  if [ "$?" -eq 1 ]; then
+    echo -en "
+\E[1;33;44m
+Faild to setup TBS drivers for i386 system.
+
+Aborting...
+\E[0m
+
+"
+    cd ../v4l-tbs &&  exit 1
+  fi
+  cd ../v4l-tbs
+fi
+

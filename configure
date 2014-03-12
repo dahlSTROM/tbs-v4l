@@ -1,0 +1,392 @@
+#!/bin/bash
+
+# Be root to run this
+if ! echo "$(whoami)" | grep "root" > /dev/null 2>&1; then
+  echo -en "
+\E[1;33;44m
+You need root privs to run this
+
+Aborting...
+\E[0m
+
+"
+  exit 0
+fi
+
+# Show failure message
+dvbdev_patch(){
+  echo -en "
+\E[1;33;44m
+dvbdev.c has been changed upstream. So it can not
+be patched automatically. Please open a ticket at
+https://github.com/bas-t/v4l-tbs and either hand me
+the fix or ask me to fix it. I need to know what
+sources you used, v4l or endriss.
+
+Aborting...
+\E[0m
+
+"
+  cd ../v4l-tbs && exit 1
+}
+
+# Show failure message
+makefile_patch(){
+  echo -en "
+\E[1;33;44m
+The Makefile has been changed upstream. So it can not
+be patched automatically. Please open a ticket at
+https://github.com/bas-t/v4l-tbs and either hand me
+the fix or ask me to fix it.
+
+Aborting...
+\E[0m
+
+"
+  cd ../v4l-tbs && exit 1
+}
+
+# Show failure message
+download(){
+  echo -en "
+\E[1;33;44m
+Faild to download v4l build system.
+
+Aborting...
+\E[0m
+
+"
+  cd v4l-tbs && exit 1
+}
+
+# Show failure message
+prepare(){
+  echo -en "
+\E[1;33;44m
+Faild to prepare the build system for compilation.
+
+Aborting...
+\E[0m
+
+"
+  cd ../v4l-tbs && exit 1
+}
+
+# Show failure message
+die_unknown(){
+  echo -en "
+\E[1;33;44m
+Unknown option \"$1\".
+\E[0m
+
+"
+  sleep 2
+  ./configure --help
+  exit 1
+}
+
+# Show help message
+show_help(){
+  echo " Usage: ./configure --opt1=<opt> --opt2=<opt>"
+  echo "                        "
+  echo " Options: [default], if any, in brackets after option."
+  echo "                        "
+  echo " --help                 Print this message"
+  echo "                        "
+  echo " --endriss=<opt>        [no] yes: use endriss sources."
+  echo "                        "
+  echo " --ffdecsabuild=<opt>   [yes] no: Don't build FFdecsawrapper"
+  echo "                        "
+  echo " --ffdecsaconf=<bool>   Use own FFdecsawrapper options"
+  echo "                        Don't use this option unless you"
+  echo "                        exactly know what you are doing."
+  echo "                        "
+  echo " --tbs=<opt>            [yes] no: Don't use TBS drivers."
+  echo "                        "
+  echo " --dvbdev=<opt>         [yes] no: Don't patch dvbdev.c."
+  echo "                        no also sets --ffdecsabuild=no"
+  echo "                        "
+  echo " --update=<opt>         [yes] no: Don't update v4l-tbs repo"
+  echo "                        "
+  echo " --failsafe=<opt>       [no] yes: Use older v4l tree"
+  echo "                        Disables endriss"
+  echo "                        "
+  exit 0
+}
+
+# Set default options
+endriss_opt="no"
+ffdecsa_build="yes"
+tbs_opt="yes"
+dvbdev_opt="yes"
+update_opt="yes"
+failsafe_opt="no"
+
+# Set options from command line
+for opt do
+  optval="${opt#*=}"
+  case "$opt" in
+  --endriss=*) endriss_opt="$optval"
+  ;;
+  --ffdecsabuild=*) ffdecsa_build="$optval"
+  ;;
+  --ffdecsaconf=*) ffdecsa_conf="$optval"
+  ;;
+  --tbs=*) tbs_opt="$optval"
+  ;;
+  --dvbdev=*) ffdecsa_build="no"; dvbdev_opt="$optval"
+  ;;
+  --update=*) update_opt="$optval"
+  ;;
+  --failsafe=*) endriss_opt="no"; failsafe_opt="$optval"
+  ;;
+  --help) show_help
+  ;;
+  *)
+  die_unknown $opt
+  ;;
+  esac
+done
+
+# Check for incorrect use of options, except --ffdecsaconf (that's an "experts only" opt)
+if test "x$endriss_opt" = "xno" || test "x$endriss_opt" = "xyes"; then
+  if ! [ "$?" -eq 0 ]; then
+    echo "
+Bad option to --endriss '$endriss_opt'.  Should be 'yes or no'"
+    exit 1
+  fi
+fi
+
+if test "x$ffdecsa_build" = "xno" || test "x$ffdecsa_build" = "xyes"; then
+  if ! [ "$?" -eq 0 ]; then
+    echo "
+Bad option to --ffdecsabuild '$ffdecsa_build'.  Should be 'yes or no'"
+    exit 1
+  fi
+fi
+
+if test "x$tbs_opt" = "xno" || test "x$tbs_opt" = "xyes"; then
+  if ! [ "$?" -eq 0 ]; then
+    echo "
+Bad option to --tbs '$tbs_opt'.  Should be 'yes or no'"
+    exit 1
+  fi
+fi
+
+if test "x$dvbdev_opt" = "xno" || test "x$dvbdev_opt" = "xyes"; then
+  if ! [ "$?" -eq 0 ]; then
+    echo "
+Bad option to --dvbdev '$dvbdev_opt'.  Should be 'yes or no'"
+    exit 1
+  fi
+fi
+
+if test "x$update_opt" = "xno" || test "x$update_opt" = "xyes"; then
+  if ! [ "$?" -eq 0 ]; then
+    echo "
+Bad option to --update '$update_opt'.  Should be 'yes or no'"
+    exit 1
+  fi
+fi
+
+if test "x$failsafe_opt" = "xno" || test "x$failsafe_opt" = "xyes"; then
+  if ! [ "$?" -eq 0 ]; then
+    echo "
+Bad option to --failsafe '$failsafe_opt'.  Should be 'yes or no'"
+    exit 1
+  fi
+fi
+
+# Clean and update this repo
+if test "x$update_opt" = "xyes"; then
+  git clean -xfd
+  git reset --hard HEAD
+  git pull
+fi
+
+# Pull and prepare the v4l sources
+if test "x$endriss_opt" = "xno"; then
+  # Build against v4l
+  # Pull the build system
+  cd .. && rm -rf media_build && git clone git://git.linuxtv.org/media_build.git
+  if ! [ "$?" -eq 0 ]; then
+    download
+  fi  
+  cd v4l-tbs
+
+  # Use older v4l tree
+  if test "x$failsafe_opt" = "xyes"; then
+    cd ../media_build && git checkout cb630da26e && git checkout -b failsafe && cd ../v4l-tbs
+    sed -i 's/linux-media-LATEST/linux-media-2013-06-20/g' ../media_build/linux/Makefile
+  fi
+
+  # Comment ou the unwanted commands
+  sed -i 's/system ("make allyesconfig")/#system ("make allyesconfig")/' ../media_build/build
+  sed -i 's/system ("make")/#system ("make")/' ../media_build/build
+  if test "x$failsafe_opt" = "xyes"; then
+    sed -i 's/system("git pull/#system("git pull/' ../media_build/build
+  fi
+
+  # Prepare the build system, stage one
+  cd ../media_build && ./build
+  if ! [ "$?" -eq 0 ]; then
+    prepare
+  fi  
+  cd ../v4l-tbs
+
+  # Patch the build system
+  echo "
+Patching Makefile
+"
+  cd ../media_build && patch -p1 < ../v4l-tbs/make-install.patch
+  if ! [ "$?" -eq 0 ]; then
+    makefile_patch
+  fi
+  cd ../v4l-tbs
+
+  if test "x$failsafe_opt" = "xyes"; then
+    cd ../media_build && patch -p1 < ../v4l-tbs/ffdecsawrapper-failsafe.patch
+  else
+    cd ../media_build && patch -p1 < ../v4l-tbs/ffdecsawrapper.patch
+    echo "
+Patching dvbdev.c
+"
+    if ! [ "$?" -eq 0 ]; then
+      dvbdev_patch
+    fi
+    cd ../v4l-tbs
+  fi
+
+else
+  # Build against v4l-experimental (Oliver Endriss)
+  # Pull the build system
+  if ! [ -f /usr/bin/hg ]; then
+    echo -en "
+\E[1;33;44m
+Your system does not contain /usr/bin/hg
+You should install mercurial on your system
+if yo want to use endriss sources
+
+Aborting...
+\E[0m
+
+"
+    exit 1
+  fi
+  cd .. && rm -rf media_build && hg clone http://linuxtv.org/hg/~endriss/media_build_experimental media_build
+  if ! [ "$?" -eq 0 ]; then
+    download
+  fi
+  cd v4l-tbs
+
+
+  # Prepare the build system, stage one
+  cd ../media_build && make download
+  if ! [ "$?" -eq 0 ]; then
+    prepare
+  fi  
+  make untar
+  if ! [ "$?" -eq 0 ]; then
+    prepare
+  fi
+  cd ../v4l-tbs
+
+  # Patch the build system
+  echo "
+Patching dvbdev.c
+"
+  cd ../media_build && patch -p1 < ../v4l-tbs/ffdecsawrapper-endriss.patch
+  if ! [ "$?" -eq 0 ]; then
+    dvbdev_patch
+  fi
+  cd ../v4l-tbs
+fi
+
+# Add TBS drivers to build system
+if test "x$tbs_opt" = "xyes"; then
+  echo -en "
+\E[1;33;44m
+Adding TBS drivers to the build system
+\E[0m
+
+"
+  sleep 2
+  cd ../v4l-tbs
+  ./add-tbs-drivers
+  if ! [ "$?" -eq 0 ]; then
+    exit 1
+  else
+    echo -en "
+\E[1;33;44m
+Done, no errors reported
+\E[0m
+
+"
+    sleep 2
+  fi
+fi
+
+# Configure v4l
+echo "
+Generating a new v4l drivers config
+"
+cd ../media_build && make allyesconfig
+  if ! [ "$?" -eq 0 ]; then
+    echo -en "
+\E[1;33;44m
+Failed to generate a new v4l drivers config
+
+Aborting...
+\E[0m
+
+"
+  cd ../v4l-tbs && exit 1
+  fi
+cd ../v4l-tbs
+
+# Compile v4l tree
+echo "
+Compiling v4l drivers.
+Please be patient, this may take some time...
+"
+cd ../media_build && make
+  if ! [ "$?" -eq 0 ]; then
+    echo -en "
+\E[1;33;44m
+Failed to compile drivers.
+Aborting...
+\E[0m
+
+"
+    cd ../v4l-tbs && exit 1
+  fi
+cd ../v4l-tbs
+
+# Install v4l drivers and firmware
+echo "
+Installing v4l drivers and firmware.
+"
+cd ../media_build && make install
+  if ! [ "$?" -eq 0 ]; then
+    echo -en "
+\E[1;33;44m
+Failed to install drivers and firmware.
+Aborting...
+\E[0m
+
+"
+    cd ../v4l-tbs && exit 1
+  fi
+cd ../v4l-tbs
+
+# Pull in FFdecsawrapper, configure and compile it
+if test "x$ffdecsa_build" = "xyes"; then
+  cd .. && rm -rf ffdecsawrapper && git clone https://github.com/bas-t/ffdecsawrapper.git && cd v4l-tbs
+
+  if test "x$ffdecsawrapper_conf" != "x"; then
+    cd ../ffdecsawrapper && ./configure $ffdecsawrapper_conf && cd ../v4l-tbs
+  else
+    cd ../ffdecsawrapper && ./configure --dvb_dir=../media_build/linux && cd ../v4l-tbs
+  fi
+fi
+

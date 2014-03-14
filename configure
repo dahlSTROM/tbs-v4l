@@ -19,7 +19,7 @@ dvbdev_patch(){
 \E[1;33;44m
 dvbdev.c has been changed upstream. So it can not
 be patched automatically. Please open a ticket at
-https://github.com/bas-t/v4l-tbs and either hand me
+https://github.com/bas-t/tbs6680-v4l and either hand me
 the fix or ask me to fix it. I need to know what
 sources you used, v4l or endriss.
 
@@ -36,7 +36,7 @@ makefile_patch(){
 \E[1;33;44m
 The Makefile has been changed upstream. So it can not
 be patched automatically. Please open a ticket at
-https://github.com/bas-t/v4l-tbs and either hand me
+https://github.com/bas-t/tbs6680-v4l and either hand me
 the fix or ask me to fix it.
 
 Aborting...

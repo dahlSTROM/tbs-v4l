@@ -53,7 +53,7 @@ obj-\$(CONFIG_DVB_TBS6680FE) += tbs6680fe.o" ../media_build/linux/drivers/media/
 sed -i "$ a\
 tbs6680fe-objs += kmem_wrap.o tbs6680fe_driver.o" ../media_build/linux/drivers/media/dvb-frontends/Makefile
 
-cd ../media_build && patch -p1 < ../v4l-tbs/6680_patch && cd ../v4l-tbs
+cd ../media_build && patch -p1 < ../tbs6680-v4l/6680_patch && cd ../tbs6680-v4l
 
 if [ "$?" -eq 1 ]; then
   echo -en "
@@ -83,9 +83,9 @@ Aborting...
 \E[0m
 
 "
-    cd ../v4l-tbs &&  exit 1
+    cd ../tbs6680-v4l &&  exit 1
   fi
-  cd ../v4l-tbs
+  cd ../tbs6680-v4l
 else
   echo "
 Setting up TBS drivers for a i386 system
@@ -100,8 +100,8 @@ Aborting...
 \E[0m
 
 "
-    cd ../v4l-tbs &&  exit 1
+    cd ../tbs6680-v4l &&  exit 1
   fi
-  cd ../v4l-tbs
+  cd ../tbs6680-v4l
 fi
 

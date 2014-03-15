@@ -359,7 +359,7 @@ echo "
 Compiling v4l drivers.
 Please be patient, this may take some time...
 "
-cd ../media_build && make
+cd ../media_build && make -j 3
   if ! [ "$?" -eq 0 ]; then
     echo -en "
 \E[1;33;44m

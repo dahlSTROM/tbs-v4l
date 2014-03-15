@@ -350,7 +350,9 @@ Aborting...
 cd ../tbs6680-v4l
 
 # Set DVB_MAX_ADAPTERS
-sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" ../media_build/v4l/.config
+if test "x$adapters_opt" != "x"; then
+  sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" ../media_build/v4l/.config
+fi
 
 # Compile v4l tree
 echo "

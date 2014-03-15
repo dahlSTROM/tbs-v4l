@@ -111,6 +111,8 @@ show_help(){
   echo " --failsafe=<opt>       [no] yes: Use older v4l tree"
   echo "                        Disables endriss"
   echo "                        "
+  echo " --adapters=<opt>       [8] Set max number of adapters"
+  echo "                        "
   exit 0
 }
 
@@ -121,6 +123,7 @@ tbs_opt="yes"
 dvbdev_opt="yes"
 update_opt="yes"
 failsafe_opt="no"
+adapters_opt="8"
 
 # Set options from command line
 for opt do
@@ -139,6 +142,8 @@ for opt do
   --update=*) update_opt="$optval"
   ;;
   --failsafe=*) endriss_opt="no"; failsafe_opt="$optval"
+  ;;
+  --adapters=*) adapters_opt="$optval"
   ;;
   --help) show_help
   ;;
@@ -343,6 +348,9 @@ Aborting...
   cd ../tbs6680-v4l && exit 1
   fi
 cd ../tbs6680-v4l
+
+# Set DVB_MAX_ADAPTERS
+sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" ../media_build/v4l/.config
 
 # Compile v4l tree
 echo "

@@ -56,7 +56,7 @@ Aborting...
 \E[0m
 
 "
-  cd v4l-tbs && exit 1
+  cd tbs6680-v4l && exit 1
 }
 
 # Show failure message
@@ -106,7 +106,7 @@ show_help(){
   echo " --dvbdev=<opt>         [yes] no: Don't patch dvbdev.c."
   echo "                        no also sets --ffdecsabuild=no"
   echo "                        "
-  echo " --update=<opt>         [yes] no: Don't update v4l-tbs repo"
+  echo " --update=<opt>         [yes] no: Don't update tbs6680-v4l repo"
   echo "                        "
   echo " --failsafe=<opt>       [no] yes: Use older v4l tree"
   echo "                        Disables endriss"
@@ -212,7 +212,7 @@ if test "x$endriss_opt" = "xno"; then
   if ! [ "$?" -eq 0 ]; then
     download
   fi  
-  cd v4l-tbs
+  cd tbs6680-v4l
 
   # Use older v4l tree
   if test "x$failsafe_opt" = "xyes"; then
@@ -277,7 +277,7 @@ Aborting...
   if ! [ "$?" -eq 0 ]; then
     download
   fi
-  cd v4l-tbs
+  cd tbs6680-v4l
 
 
   # Prepare the build system, stage one
@@ -381,7 +381,7 @@ cd ../tbs6680-v4l
 
 # Pull in FFdecsawrapper, configure and compile it
 if test "x$ffdecsa_build" = "xyes"; then
-  cd .. && rm -rf ffdecsawrapper && git clone https://github.com/bas-t/ffdecsawrapper.git && cd v4l-tbs
+  cd .. && rm -rf ffdecsawrapper && git clone https://github.com/bas-t/ffdecsawrapper.git && cd tbs6680-v4l
 
   if test "x$ffdecsawrapper_conf" != "x"; then
     cd ../ffdecsawrapper && ./configure $ffdecsawrapper_conf && cd ../tbs6680-v4l

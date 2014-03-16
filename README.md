@@ -9,4 +9,4 @@ This will compile tbs6680 drivers using today's v4l branch and having done that,
 
 The --adapter=16 option is because I have 8 dvb-c adapters in my backend and I'm obviously going to use FFdecsawrapper.
 
-If you have x adapters, use --adapters=<twice your adapters>, so if you have 10, use --adapters=20
+If you have 10 adapters, use --adapters=20

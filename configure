@@ -104,8 +104,6 @@ show_help(){
   echo " --dvbdev=<opt>         [yes] no: Don't patch dvbdev.c."
   echo "                        no also sets --ffdecsabuild=no"
   echo "                        "
-  echo " --update=<opt>         [yes] no: Don't update tbs6680-v4l repo"
-  echo "                        "
   echo " --failsafe=<opt>       [no] yes: Use older v4l tree"
   echo "                        Disables endriss"
   echo "                        "
@@ -118,7 +116,6 @@ show_help(){
 ffdecsa_build="yes"
 tbs_opt="yes"
 dvbdev_opt="yes"
-update_opt="yes"
 failsafe_opt="no"
 adapters_opt="8"
 
@@ -134,9 +131,7 @@ for opt do
   ;;
   --dvbdev=*) ffdecsa_build="no"; dvbdev_opt="$optval"
   ;;
-  --update=*) update_opt="$optval"
-  ;;
-  --failsafe=*) endriss_opt="no"; failsafe_opt="$optval"
+  --failsafe=*) failsafe_opt="$optval"
   ;;
   --adapters=*) adapters_opt="$optval"
   ;;
@@ -173,14 +168,6 @@ Bad option to --dvbdev '$dvbdev_opt'.  Should be 'yes or no'"
   fi
 fi
 
-if test "x$update_opt" = "xno" || test "x$update_opt" = "xyes"; then
-  if ! [ "$?" -eq 0 ]; then
-    echo "
-Bad option to --update '$update_opt'.  Should be 'yes or no'"
-    exit 1
-  fi
-fi
-
 if test "x$failsafe_opt" = "xno" || test "x$failsafe_opt" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
     echo "
@@ -189,16 +176,8 @@ Bad option to --failsafe '$failsafe_opt'.  Should be 'yes or no'"
   fi
 fi
 
-# Clean and update this repo
-if test "x$update_opt" = "xyes"; then
-  git clean -xfd
-  git reset --hard HEAD
-  git pull
-fi
 
 # Pull and prepare the v4l sources
-  # Build against v4l
-  # Pull the build system
 cd .. && rm -rf media_build && git clone git://git.linuxtv.org/media_build.git
 if ! [ "$?" -eq 0 ]; then
   download

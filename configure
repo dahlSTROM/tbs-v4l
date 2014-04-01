@@ -93,8 +93,6 @@ show_help(){
   echo "                        "
   echo " --help                 Print this message"
   echo "                        "
-  echo " --endriss=<opt>        [no] yes: use endriss sources."
-  echo "                        "
   echo " --ffdecsabuild=<opt>   [yes] no: Don't build FFdecsawrapper"
   echo "                        "
   echo " --ffdecsaconf=<bool>   Use own FFdecsawrapper options"
@@ -117,7 +115,6 @@ show_help(){
 }
 
 # Set default options
-endriss_opt="no"
 ffdecsa_build="yes"
 tbs_opt="yes"
 dvbdev_opt="yes"
@@ -129,8 +126,6 @@ adapters_opt="8"
 for opt do
   optval="${opt#*=}"
   case "$opt" in
-  --endriss=*) endriss_opt="$optval"
-  ;;
   --ffdecsabuild=*) ffdecsa_build="$optval"
   ;;
   --ffdecsaconf=*) ffdecsa_conf="$optval"
@@ -154,14 +149,6 @@ for opt do
 done
 
 # Check for incorrect use of options, except --ffdecsaconf (that's an "experts only" opt)
-if test "x$endriss_opt" = "xno" || test "x$endriss_opt" = "xyes"; then
-  if ! [ "$?" -eq 0 ]; then
-    echo "
-Bad option to --endriss '$endriss_opt'.  Should be 'yes or no'"
-    exit 1
-  fi
-fi
-
 if test "x$ffdecsa_build" = "xno" || test "x$ffdecsa_build" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
     echo "
@@ -210,97 +197,51 @@ if test "x$update_opt" = "xyes"; then
 fi
 
 # Pull and prepare the v4l sources
-if test "x$endriss_opt" = "xno"; then
   # Build against v4l
   # Pull the build system
-  cd .. && rm -rf media_build && git clone git://git.linuxtv.org/media_build.git
-  if ! [ "$?" -eq 0 ]; then
-    download
-  fi  
-  cd tbs6680-v4l
+cd .. && rm -rf media_build && git clone git://git.linuxtv.org/media_build.git
+if ! [ "$?" -eq 0 ]; then
+  download
+fi  
+cd tbs6680-v4l
 
-  # Use older v4l tree
-  if test "x$failsafe_opt" = "xyes"; then
-    cd ../media_build && git checkout cb630da26e && git checkout -b failsafe && cd ../tbs6680-v4l
-    sed -i 's/linux-media-LATEST/linux-media-2013-06-20/g' ../media_build/linux/Makefile
-  fi
+# Use older v4l tree
+if test "x$failsafe_opt" = "xyes"; then
+  cd ../media_build && git checkout cb630da26e && git checkout -b failsafe && cd ../tbs6680-v4l
+  sed -i 's/linux-media-LATEST/linux-media-2013-06-20/g' ../media_build/linux/Makefile
+fi
 
-  # Comment ou the unwanted commands
-  sed -i 's/system ("make allyesconfig")/#system ("make allyesconfig")/' ../media_build/build
-  sed -i 's/system ("make")/#system ("make")/' ../media_build/build
-  if test "x$failsafe_opt" = "xyes"; then
-    sed -i 's/system("git pull/#system("git pull/' ../media_build/build
-  fi
+# Comment ou the unwanted commands
+sed -i 's/system ("make allyesconfig")/#system ("make allyesconfig")/' ../media_build/build
+sed -i 's/system ("make")/#system ("make")/' ../media_build/build
+if test "x$failsafe_opt" = "xyes"; then
+  sed -i 's/system("git pull/#system("git pull/' ../media_build/build
+fi
 
-  # Prepare the build system, stage one
-  cd ../media_build && ./build
-  if ! [ "$?" -eq 0 ]; then
-    prepare
-  fi  
-  cd ../tbs6680-v4l
+# Prepare the build system, stage one
+cd ../media_build && ./build
+if ! [ "$?" -eq 0 ]; then
+  prepare
+fi  
+cd ../tbs6680-v4l
 
-  # Patch the build system
-  echo "
+# Patch the build system
+echo "
 Patching Makefile
 "
-  cd ../media_build && patch -p1 < ../tbs6680-v4l/make-install.patch
-  if ! [ "$?" -eq 0 ]; then
-    makefile_patch
-  fi
-  cd ../tbs6680-v4l
+cd ../media_build && patch -p1 < ../tbs6680-v4l/make-install.patch
+if ! [ "$?" -eq 0 ]; then
+  makefile_patch
+fi
+cd ../tbs6680-v4l
 
-  if test "x$failsafe_opt" = "xyes"; then
-    cd ../media_build && patch -p1 < ../tbs6680-v4l/ffdecsawrapper-failsafe.patch
-  else
-    cd ../media_build && patch -p1 < ../tbs6680-v4l/ffdecsawrapper.patch
-    echo "
-Patching dvbdev.c
-"
-    if ! [ "$?" -eq 0 ]; then
-      dvbdev_patch
-    fi
-    cd ../tbs6680-v4l
-  fi
-
+if test "x$failsafe_opt" = "xyes"; then
+  cd ../media_build && patch -p1 < ../tbs6680-v4l/ffdecsawrapper-failsafe.patch
 else
-  # Build against v4l-experimental (Oliver Endriss)
-  # Pull the build system
-  if ! [ -f /usr/bin/hg ]; then
-    echo -en "
-\E[1;33;44m
-Your system does not contain /usr/bin/hg
-You should install mercurial on your system
-if yo want to use endriss sources
-
-Aborting...
-\E[0m
-
-"
-    exit 1
-  fi
-  cd .. && rm -rf media_build && hg clone http://linuxtv.org/hg/~endriss/media_build_experimental media_build
-  if ! [ "$?" -eq 0 ]; then
-    download
-  fi
-  cd tbs6680-v4l
-
-
-  # Prepare the build system, stage one
-  cd ../media_build && make download
-  if ! [ "$?" -eq 0 ]; then
-    prepare
-  fi  
-  make untar
-  if ! [ "$?" -eq 0 ]; then
-    prepare
-  fi
-  cd ../tbs6680-v4l
-
-  # Patch the build system
+  cd ../media_build && patch -p1 < ../tbs6680-v4l/ffdecsawrapper.patch
   echo "
 Patching dvbdev.c
 "
-  cd ../media_build && patch -p1 < ../tbs6680-v4l/ffdecsawrapper-endriss.patch
   if ! [ "$?" -eq 0 ]; then
     dvbdev_patch
   fi
@@ -399,4 +340,3 @@ if test "x$ffdecsa_build" = "xyes"; then
     cd ../ffdecsawrapper && ./configure --dvb_dir=../media_build/linux && cd ../tbs6680-v4l
   fi
 fi
-

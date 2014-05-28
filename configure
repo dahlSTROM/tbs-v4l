@@ -19,7 +19,7 @@ dvbdev_patch(){
 \E[1;33;44m
 dvbdev.c has been changed upstream. So it can not
 be patched automatically. Please open a ticket at
-https://github.com/bas-t/tbs6680-v4l and either hand me
+https://github.com/bas-t/tbs-v4l and either hand me
 the fix or ask me to fix it. I need to know what
 sources you used, v4l or endriss.
 
@@ -27,7 +27,7 @@ Aborting...
 \E[0m
 
 "
-  cd ../tbs6680-v4l && exit 1
+  cd ../tbs-v4l && exit 1
 }
 
 # Show failure message
@@ -36,14 +36,14 @@ makefile_patch(){
 \E[1;33;44m
 The Makefile has been changed upstream. So it can not
 be patched automatically. Please open a ticket at
-https://github.com/bas-t/tbs6680-v4l and either hand me
+https://github.com/bas-t/tbs-v4l and either hand me
 the fix or ask me to fix it.
 
 Aborting...
 \E[0m
 
 "
-  cd ../tbs6680-v4l && exit 1
+  cd ../tbs-v4l && exit 1
 }
 
 # Show failure message
@@ -56,7 +56,7 @@ Aborting...
 \E[0m
 
 "
-  cd tbs6680-v4l && exit 1
+  cd tbs-v4l && exit 1
 }
 
 # Show failure message
@@ -69,7 +69,7 @@ Aborting...
 \E[0m
 
 "
-  cd ../tbs6680-v4l && exit 1
+  cd ../tbs-v4l && exit 1
 }
 
 # Show failure message
@@ -182,11 +182,11 @@ cd .. && rm -rf media_build && git clone git://git.linuxtv.org/media_build.git
 if ! [ "$?" -eq 0 ]; then
   download
 fi  
-cd tbs6680-v4l
+cd tbs-v4l
 
 # Use older v4l tree
 if test "x$failsafe_opt" = "xyes"; then
-  cd ../media_build && git checkout cb630da26e && git checkout -b failsafe && cd ../tbs6680-v4l
+  cd ../media_build && git checkout cb630da26e && git checkout -b failsafe && cd ../tbs-v4l
   sed -i 's/linux-media-LATEST/linux-media-2013-06-20/g' ../media_build/linux/Makefile
 fi
 
@@ -202,29 +202,29 @@ cd ../media_build && ./build
 if ! [ "$?" -eq 0 ]; then
   prepare
 fi  
-cd ../tbs6680-v4l
+cd ../tbs-v4l
 
 # Patch the build system
 echo "
 Patching Makefile
 "
-cd ../media_build && patch -p1 < ../tbs6680-v4l/make-install.patch
+cd ../media_build && patch -p1 < ../tbs-v4l/make-install.patch
 if ! [ "$?" -eq 0 ]; then
   makefile_patch
 fi
-cd ../tbs6680-v4l
+cd ../tbs-v4l
 
 if test "x$failsafe_opt" = "xyes"; then
-  cd ../media_build && patch -p1 < ../tbs6680-v4l/ffdecsawrapper-failsafe.patch
+  cd ../media_build && patch -p1 < ../tbs-v4l/ffdecsawrapper-failsafe.patch
 else
-  cd ../media_build && patch -p1 < ../tbs6680-v4l/ffdecsawrapper.patch
+  cd ../media_build && patch -p1 < ../tbs-v4l/ffdecsawrapper.patch
   echo "
 Patching dvbdev.c
 "
   if ! [ "$?" -eq 0 ]; then
     dvbdev_patch
   fi
-  cd ../tbs6680-v4l
+  cd ../tbs-v4l
 fi
 
 # Add TBS drivers to build system
@@ -236,7 +236,7 @@ Adding TBS drivers to the build system
 
 "
   sleep 2
-  cd ../tbs6680-v4l
+  cd ../tbs-v4l
   ./add-tbs-drivers
   if ! [ "$?" -eq 0 ]; then
     exit 1
@@ -265,9 +265,9 @@ Aborting...
 \E[0m
 
 "
-  cd ../tbs6680-v4l && exit 1
+  cd ../tbs-v4l && exit 1
   fi
-cd ../tbs6680-v4l
+cd ../tbs-v4l
 
 # Set DVB_MAX_ADAPTERS
 if test "x$adapters_opt" != "x"; then
@@ -288,9 +288,9 @@ Aborting...
 \E[0m
 
 "
-    cd ../tbs6680-v4l && exit 1
+    cd ../tbs-v4l && exit 1
   fi
-cd ../tbs6680-v4l
+cd ../tbs-v4l
 
 # Install v4l drivers and firmware
 echo "
@@ -305,17 +305,17 @@ Aborting...
 \E[0m
 
 "
-    cd ../tbs6680-v4l && exit 1
+    cd ../tbs-v4l && exit 1
   fi
-cd ../tbs6680-v4l
+cd ../tbs-v4l
 
 # Pull in FFdecsawrapper, configure and compile it
 if test "x$ffdecsa_build" = "xyes"; then
-  cd .. && rm -rf ffdecsawrapper && git clone https://github.com/bas-t/ffdecsawrapper.git && cd tbs6680-v4l
+  cd .. && rm -rf ffdecsawrapper && git clone https://github.com/bas-t/ffdecsawrapper.git && cd tbs-v4l
 
   if test "x$ffdecsawrapper_conf" != "x"; then
-    cd ../ffdecsawrapper && ./configure $ffdecsawrapper_conf && cd ../tbs6680-v4l
+    cd ../ffdecsawrapper && ./configure $ffdecsawrapper_conf && cd ../tbs-v4l
   else
-    cd ../ffdecsawrapper && ./configure --dvb_dir=../media_build/linux && cd ../tbs6680-v4l
+    cd ../ffdecsawrapper && ./configure --dvb_dir=../media_build/linux && cd ../tbs-v4l
   fi
 fi

@@ -316,6 +316,6 @@ if test "x$ffdecsa_build" = "xyes"; then
   if test "x$ffdecsawrapper_conf" != "x"; then
     cd ../ffdecsawrapper && ./configure $ffdecsawrapper_conf && cd ../tbs-v4l
   else
-    cd ../ffdecsawrapper && ./configure --dvb_dir=../media_build/linux && cd ../tbs-v4l
+    cd ../ffdecsawrapper && ./configure --dvb_dir=../media_build/linux --v4l=yes && cd ../tbs-v4l
   fi
 fi

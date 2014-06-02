@@ -161,32 +161,48 @@ done
 # Check for incorrect use of options, except --ffdecsaconf (that's an "experts only" opt)
 if test "x$ffdecsa_build" = "xno" || test "x$ffdecsa_build" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
-    echo "
-Bad option to --ffdecsabuild '$ffdecsa_build'.  Should be 'yes or no'"
+    echo -en "
+\E[1;33;44m
+Bad option to --ffdecsabuild '$ffdecsa_build'.  Should be 'yes or no'
+\E[0m
+
+"
     exit 1
   fi
 fi
 
 if test "x$tbs_opt" = "xno" || test "x$tbs_opt" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
-    echo "
-Bad option to --tbs '$tbs_opt'.  Should be 'yes or no'"
+    echo -en "
+\E[1;33;44m
+Bad option to --tbs '$tbs_opt'.  Should be 'yes or no'
+\E[0m
+
+"
     exit 1
   fi
 fi
 
 if test "x$dvbdev_opt" = "xno" || test "x$dvbdev_opt" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
-    echo "
-Bad option to --dvbdev '$dvbdev_opt'.  Should be 'yes or no'"
+    echo -en "
+\E[1;33;44m
+Bad option to --dvbdev '$dvbdev_opt'.  Should be 'yes or no'
+\E[0m
+
+"
     exit 1
   fi
 fi
 
 if test "x$failsafe_opt" = "xno" || test "x$failsafe_opt" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
-    echo "
-Bad option to --failsafe '$failsafe_opt'.  Should be 'yes or no'"
+    echo -en "
+\E[1;33;44m
+Bad option to --failsafe '$failsafe_opt'.  Should be 'yes or no'
+\E[0m
+
+"
     exit 1
   fi
 fi
@@ -199,7 +215,7 @@ if ! [ "$?" -eq 0 ]; then
 fi  
 cd tbs-v4l
 
-# Use older v4l tree
+# Use known working older v4l tree
 if test "x$failsafe_opt" = "xyes"; then
   cd ../media_build && git checkout c3e8bd66491a0ea && git checkout -b failsafe && cd ../tbs-v4l
   sed -i 's/linux-media-LATEST/linux-media-2014-05-26-5ea8787/g' ../media_build/linux/Makefile
@@ -212,16 +228,19 @@ if test "x$failsafe_opt" = "xyes"; then
   sed -i 's/system("git pull/#system("git pull/' ../media_build/build
 fi
 
-# Prepare the build system, stage one
+# Prepare the build system (stage one)
 cd ../media_build && ./build
 if ! [ "$?" -eq 0 ]; then
   prepare
 fi  
 cd ../tbs-v4l
 
-# Patch the build system
-echo "
+# Patch the build system (stage two)
+echo -en "
+\E[1;33;44m
 Patching Makefile
+\E[0m
+
 "
 cd ../media_build && patch -p1 < ../tbs-v4l/make-install.patch
 if ! [ "$?" -eq 0 ]; then
@@ -233,8 +252,11 @@ if test "x$failsafe_opt" = "xyes"; then
   cd ../media_build && patch -p1 < ../tbs-v4l/ffdecsawrapper-failsafe.patch
 else
   cd ../media_build && patch -p1 < ../tbs-v4l/ffdecsawrapper.patch
-  echo "
+  echo -en "
+\E[1;33;44m
 Patching dvbdev.c
+\E[0m
+
 "
   if ! [ "$?" -eq 0 ]; then
     dvbdev_patch
@@ -242,7 +264,7 @@ Patching dvbdev.c
   cd ../tbs-v4l
 fi
 
-# Add TBS drivers to build system
+# Add TBS drivers to build system (stage three)
 if test "x$tbs_opt" = "xyes"; then
   echo -en "
 \E[1;33;44m
@@ -275,8 +297,11 @@ Done, no errors reported
 fi
 
 # Configure v4l
-echo "
+echo -en "
+\E[1;33;44m
 Generating a new v4l drivers config
+\E[0m
+
 "
 cd ../media_build && make allyesconfig
   if ! [ "$?" -eq 0 ]; then
@@ -298,9 +323,12 @@ if test "x$adapters_opt" != "x"; then
 fi
 
 # Compile v4l tree
-echo "
+echo -en "
+\E[1;33;44m
 Compiling v4l drivers.
 Please be patient, this may take some time...
+\E[0m
+
 "
 cd ../media_build && make -j 3
   if ! [ "$?" -eq 0 ]; then
@@ -316,8 +344,11 @@ Aborting...
 cd ../tbs-v4l
 
 # Install v4l drivers and firmware
-echo "
+echo -en "
+\E[1;33;44m
 Installing v4l drivers and firmware.
+\E[0m
+
 "
 cd ../media_build && make install
   if ! [ "$?" -eq 0 ]; then

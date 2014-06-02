@@ -254,6 +254,14 @@ Adding TBS drivers to the build system
   cd ../tbs-v4l
   ./add-tbs-drivers
   if ! [ "$?" -eq 0 ]; then
+    echo -en " 
+\E[1;33;44m
+Failed to add TBS drivers to the build system
+
+Aborting...
+\E[0m
+
+"
     exit 1
   else
     echo -en "

@@ -43,6 +43,7 @@
 #include "tbsci.h"
 
 #include "tbs6680fe.h"
+#include "tbs62x1fe.h"
 
 #include "tbsmac.h"
 

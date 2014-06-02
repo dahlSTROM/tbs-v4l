@@ -1,12 +1,15 @@
---- a/linux/drivers/media/dvb-core/dvbdev.c	2013-11-27 17:05:01.299976449 +0100
-+++ b/linux/drivers/media/dvb-core/dvbdev.c	2013-11-27 16:59:35.254532000 +0100
-@@ -82,7 +82,9 @@
+--- a/linux/drivers/media/dvb-core/dvbdev.c	2014-05-14 14:08:04.000000000 +0200
++++ b/linux/drivers/media/dvb-core/dvbdev.c	2014-06-02 21:15:47.409410877 +0200
+@@ -81,8 +81,11 @@
+ 			goto fail;
  		file->private_data = dvbdev;
  		replace_fops(file, new_fops);
- 		if (file->f_op->open)
+-		if (file->f_op->open)
++		if (file->f_op->open) {
 +			mutex_unlock(&dvbdev_mutex);
  			err = file->f_op->open(inode,file);
 +			mutex_lock(&dvbdev_mutex);
++		}
  		up_read(&minor_rwsem);
  		mutex_unlock(&dvbdev_mutex);
  		return err;

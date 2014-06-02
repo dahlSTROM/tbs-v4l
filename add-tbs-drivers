@@ -52,6 +52,11 @@ sed -i "$ a\
 obj-\$(CONFIG_DVB_TBS6680FE) += tbs6680fe.o" ../media_build/linux/drivers/media/dvb-frontends/Makefile
 sed -i "$ a\
 tbs6680fe-objs += kmem_wrap.o tbs6680fe_driver.o" ../media_build/linux/drivers/media/dvb-frontends/Makefile
+sed -i "$ a\
+obj-\$(CONFIG_DVB_TBS62X1FE) += tbs62x1fe.o" ../media_build/linux/drivers/media/dvb-frontends/Makefile
+sed -i "$ a\
+tbs62x1fe-objs += kmem_wrap.o tbs62x1fe_driver.o" ../media_build/linux/drivers/media/dvb-frontends/Makefile
+
 
 cd ../media_build && patch -p1 < ../tbs-v4l/kconfig_patch && cd ../tbs-v4l
 

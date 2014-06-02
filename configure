@@ -20,8 +20,7 @@ dvbdev_patch(){
 dvbdev.c has been changed upstream. So it can not
 be patched automatically. Please open a ticket at
 https://github.com/bas-t/tbs-v4l and either hand me
-the fix or ask me to fix it. I need to know what
-sources you used, v4l or endriss.
+the fix or ask me to fix it.
 
 Aborting...
 \E[0m
@@ -186,11 +185,11 @@ cd tbs-v4l
 
 # Use older v4l tree
 if test "x$failsafe_opt" = "xyes"; then
-  cd ../media_build && git checkout cb630da26e && git checkout -b failsafe && cd ../tbs-v4l
-  sed -i 's/linux-media-LATEST/linux-media-2013-06-20/g' ../media_build/linux/Makefile
+  cd ../media_build && git checkout c3e8bd66491a0ea && git checkout -b failsafe && cd ../tbs-v4l
+  sed -i 's/linux-media-LATEST/linux-media-2014-05-26-5ea8787/g' ../media_build/linux/Makefile
 fi
 
-# Comment ou the unwanted commands
+# Comment out the unwanted commands
 sed -i 's/system ("make allyesconfig")/#system ("make allyesconfig")/' ../media_build/build
 sed -i 's/system ("make")/#system ("make")/' ../media_build/build
 if test "x$failsafe_opt" = "xyes"; then

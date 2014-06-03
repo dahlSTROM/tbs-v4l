@@ -45,11 +45,11 @@ show_help(){
 die_unknown(){
   echo -en "
 \E[1;33;44m
-Unknown option \"$1\".
+Unknown option \"$1\"
 \E[0m
 
 "
-  sleep 2
+  sleep 5
   ./configure --help
   exit 1
 }

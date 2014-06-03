@@ -13,95 +13,9 @@ Aborting...
   exit 0
 fi
 
-confirmyes(){
-    # call with a prompt string or use a default
-    read -r -p "${1:-Are you sure? [Y/n]} " response
-    case $response in
-        [yY][eE][sS]|[yY]) 
-            true
-            ;;
-        [nN][oO]|[nN])
-            false
-            ;;
-        *)
-            true
-            ;;
-    esac
-}
-
-# Show failure message
-dvbdev_patch(){
-  echo -en "
-\E[1;33;44m
-dvbdev.c has been changed upstream. So it can not
-be patched automatically. Please open a ticket at
-https://github.com/bas-t/tbs-v4l and either hand me
-the fix or ask me to fix it.
-
-Aborting...
-\E[0m
-
-"
-  cd ../tbs-v4l && exit 1
-}
-
-# Show failure message
-makefile_patch(){
-  echo -en "
-\E[1;33;44m
-The Makefile has been changed upstream. So it can not
-be patched automatically. Please open a ticket at
-https://github.com/bas-t/tbs-v4l and either hand me
-the fix or ask me to fix it.
-
-Aborting...
-\E[0m
-
-"
-  cd ../tbs-v4l && exit 1
-}
-
-# Show failure message
-download(){
-  echo -en "
-\E[1;33;44m
-Faild to download v4l build system.
-
-Aborting...
-\E[0m
-
-"
-  cd tbs-v4l && exit 1
-}
-
-# Show failure message
-prepare(){
-  echo -en "
-\E[1;33;44m
-Faild to prepare the build system for compilation.
-
-Aborting...
-\E[0m
-
-"
-  cd ../tbs-v4l && exit 1
-}
-
-# Show failure message
-die_unknown(){
-  echo -en "
-\E[1;33;44m
-Unknown option \"$1\".
-\E[0m
-
-"
-  sleep 2
-  ./configure --help
-  exit 1
-}
-
 # Show help message
 show_help(){
+  echo "                        "
   echo " Usage: ./configure --opt1=<opt> --opt2=<opt>"
   echo "                        "
   echo " Options: [default], if any, in brackets after option."
@@ -119,12 +33,25 @@ show_help(){
   echo " --dvbdev=<opt>         [yes] no: Don't patch dvbdev.c."
   echo "                        no also sets --ffdecsabuild=no"
   echo "                        "
-  echo " --failsafe=<opt>       [no] yes: Use older v4l tree"
-  echo "                        Disables endriss"
+  echo " --failsafe=<opt>       [no] yes: Use known working v4l tree"
+  echo "                        from the first of june 2014"
   echo "                        "
   echo " --adapters=<opt>       [8] Set max number of adapters"
   echo "                        "
   exit 0
+}
+
+# Show failure message
+die_unknown(){
+  echo -en "
+\E[1;33;44m
+Unknown option \"$1\".
+\E[0m
+
+"
+  sleep 2
+  ./configure --help
+  exit 1
 }
 
 # Set default options
@@ -157,6 +84,80 @@ for opt do
   ;;
   esac
 done
+
+confirmyes(){
+    # call with a prompt string or use a default
+    read -r -p "${1:-Are you sure? [Y/n]} " response
+    case $response in
+        [yY][eE][sS]|[yY]) 
+            true
+            ;;
+        [nN][oO]|[nN])
+            false
+            ;;
+        *)
+            true
+            ;;
+    esac
+}
+
+# Show failure message
+dvbdev_patch(){
+  echo -en "
+\E[1;33;44m
+dvbdev.c has been changed upstream. So it can not
+be patched automatically. Please open a ticket at
+https://github.com/bas-t/tbs-v4l and either hand me
+the fix or ask me to fix it.
+
+Aborting...
+\E[0m
+
+"
+  exit 1
+}
+
+# Show failure message
+makefile_patch(){
+  echo -en "
+\E[1;33;44m
+The Makefile has been changed upstream. So it can not
+be patched automatically. Please open a ticket at
+https://github.com/bas-t/tbs-v4l and either hand me
+the fix or ask me to fix it.
+
+Aborting...
+\E[0m
+
+"
+  exit 1
+}
+
+# Show failure message
+download(){
+  echo -en "
+\E[1;33;44m
+Faild to download v4l build system.
+
+Aborting...
+\E[0m
+
+"
+  exit 1
+}
+
+# Show failure message
+prepare(){
+  echo -en "
+\E[1;33;44m
+Faild to prepare the build system for compilation.
+
+Aborting...
+\E[0m
+
+"
+  exit 1
+}
 
 # Check for incorrect use of options, except --ffdecsaconf (that's an "experts only" opt)
 if test "x$ffdecsa_build" = "xno" || test "x$ffdecsa_build" = "xyes"; then
@@ -242,27 +243,31 @@ Patching Makefile
 \E[0m
 
 "
+sleep 1
 cd ../media_build && patch -p1 < ../tbs-v4l/make-install.patch
 if ! [ "$?" -eq 0 ]; then
   makefile_patch
 fi
 cd ../tbs-v4l
 
-if test "x$failsafe_opt" = "xyes"; then
-  cd ../media_build && patch -p1 < ../tbs-v4l/ffdecsawrapper-failsafe.patch
-else
-  cd ../media_build && patch -p1 < ../tbs-v4l/ffdecsawrapper.patch
-  echo -en "
+echo -en "
 \E[1;33;44m
 Patching dvbdev.c
 \E[0m
 
 "
-  if ! [ "$?" -eq 0 ]; then
-    dvbdev_patch
-  fi
-  cd ../tbs-v4l
+sleep 1
+
+if test "x$failsafe_opt" = "xyes"; then
+  cd ../media_build && patch -p1 < ../tbs-v4l/ffdecsawrapper-failsafe.patch
+else
+  cd ../media_build && patch -p1 < ../tbs-v4l/ffdecsawrapper.patch
 fi
+
+if ! [ "$?" -eq 0 ]; then
+  dvbdev_patch
+fi
+cd ../tbs-v4l
 
 # Add TBS drivers to build system (stage three)
 if test "x$tbs_opt" = "xyes"; then
@@ -303,6 +308,7 @@ Generating a new v4l drivers config
 \E[0m
 
 "
+sleep 1
 cd ../media_build && make allyesconfig
   if ! [ "$?" -eq 0 ]; then
     echo -en "
@@ -330,6 +336,7 @@ Please be patient, this may take some time...
 \E[0m
 
 "
+sleep 2
 cd ../media_build && make -j 3
   if ! [ "$?" -eq 0 ]; then
     echo -en "
@@ -359,7 +366,16 @@ Aborting...
 \E[0m
 
 "
-    cd ../tbs-v4l && exit 1
+    exit 1
+  else
+    echo -en "
+\E[1;33;44m
+Installed drivers and firmware.
+No errors reported.
+\E[0m
+
+"
+sleep 2
   fi
 cd ../tbs-v4l
 

@@ -398,3 +398,14 @@ Are you running a 3.13 or higher kernel?
     cd ../ffdecsawrapper && ./configure --dvb_dir=../media_build/linux --v4l=yes && cd ../tbs-v4l
   fi
 fi
+echo -en "
+\E[1;33;44m
+All done. You shoul reboot your machine NOW!
+\E[0m
+
+"
+confirmyes "Yes, reboot now! [Y/n]"
+
+if [ "$?" -eq 0 ]; then
+  /sbin/shutdown -r now
+fi

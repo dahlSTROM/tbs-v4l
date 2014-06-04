@@ -400,7 +400,7 @@ Are you running a 3.13 or higher kernel?
 fi
 echo -en "
 \E[1;33;44m
-All done. You shoul reboot your machine NOW!
+All done. You should reboot your machine NOW!
 \E[0m
 
 "

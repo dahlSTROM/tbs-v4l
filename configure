@@ -365,10 +365,11 @@ if [ -d /lib/modules/`uname -r`/updates/media ]; then
   depmod -a
 fi
 
-if [ "$MEDIA" -eq "1" ]; then
-  echo -en "
+cd ../media_build && make install
+  if [ "$MEDIA" -eq "1" ]; then
+    echo -en "
 \E[1;33;44m
-You have just replaced the existing updated DVB driver modules
+You just replaced the existing updated DVB driver modules
 
 and the existing /lib/modules/`uname -r`/updates/media dir.
 
@@ -376,30 +377,9 @@ That is not a problem, but you have to reboot when done!!!
 \E[0m
 
 "
-  sleep 5
-fi
-
-
-cd ../media_build && make install
-  if ! [ "$?" -eq 0 ]; then
-    echo -en "
-\E[1;33;44m
-Failed to install drivers and firmware.
-Aborting...
-\E[0m
-
-"
-    exit 1
-  else
-    echo -en "
-\E[1;33;44m
-Installed drivers and firmware.
-No errors reported.
-\E[0m
-
-"
-sleep 2
+    sleep 5
   fi
+
 cd ../tbs-v4l
 
 # Pull in FFdecsawrapper, configure and compile it

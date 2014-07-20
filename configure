@@ -386,16 +386,6 @@ cd ../tbs-v4l
 # Pull in FFdecsawrapper, configure and compile it
 if test "x$ffdecsa_build" = "xyes"; then
   cd .. && rm -rf ffdecsawrapper && git clone https://github.com/bas-t/ffdecsawrapper.git && cd tbs-v4l
-
-  echo "
-Are you running a 3.13 or higher kernel?
-
-"
-      confirmyes "Yes, I do [Y/n]"
-    if ! [ "$?" -eq 0 ]; then
-       cd ../ffdecsawrapper && git checkout oldstable && cd ../tbs-v4l
-    fi
-
   if test "x$ffdecsawrapper_conf" != "x"; then
     cd ../ffdecsawrapper && ./configure $ffdecsawrapper_conf && cd ../tbs-v4l
   else

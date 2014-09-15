@@ -160,12 +160,25 @@ Aborting...
   exit 1
 }
 
+# Show faiure message
+drivers(){
+    echo -en " 
+\E[1;33;44m
+Failed to add TBS drivers to the build system
+
+Aborting...
+\E[0m
+
+"
+    exit 1
+}
+
 # Check for incorrect use of options, except --ffdecsaconf (that's an "experts only" opt)
 if test "x$ffdecsa_build" = "xno" || test "x$ffdecsa_build" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
     echo -en "
 \E[1;33;44m
-Bad option to --ffdecsabuild '$ffdecsa_build'.  Should be 'yes or no'
+Bad option to --ffdecsabuild '$ffdecsa_build'.  Should be 'yes' or 'no'
 \E[0m
 
 "
@@ -177,7 +190,7 @@ if test "x$tbs_opt" = "xno" || test "x$tbs_opt" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
     echo -en "
 \E[1;33;44m
-Bad option to --tbs '$tbs_opt'.  Should be 'yes or no'
+Bad option to --tbs '$tbs_opt'.  Should be 'yes' or 'no'
 \E[0m
 
 "
@@ -189,7 +202,7 @@ if test "x$dvbdev_opt" = "xno" || test "x$dvbdev_opt" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
     echo -en "
 \E[1;33;44m
-Bad option to --dvbdev '$dvbdev_opt'.  Should be 'yes or no'
+Bad option to --dvbdev '$dvbdev_opt'.  Should be 'yes' or 'no'
 \E[0m
 
 "
@@ -201,7 +214,7 @@ if test "x$failsafe_opt" = "xno" || test "x$failsafe_opt" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
     echo -en "
 \E[1;33;44m
-Bad option to --failsafe '$failsafe_opt'.  Should be 'yes or no'
+Bad option to --failsafe '$failsafe_opt'.  Should be 'yes' or 'no'
 \E[0m
 
 "
@@ -282,15 +295,7 @@ Adding TBS drivers to the build system
   cd ../tbs-v4l
   ./add-tbs-drivers
   if ! [ "$?" -eq 0 ]; then
-    echo -en " 
-\E[1;33;44m
-Failed to add TBS drivers to the build system
-
-Aborting...
-\E[0m
-
-"
-    exit 1
+    drivers
   else
     echo -en "
 \E[1;33;44m

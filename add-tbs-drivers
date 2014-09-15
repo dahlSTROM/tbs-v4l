@@ -1,47 +1,36 @@
 #!/bin/bash
 
-# Add TBS drivers to the build system
-cp -f v4l/* ../media_build/v4l/
-
-if [ "$?" -eq 1 ]; then
-  echo -en "
+# Show faiure message
+drivers(){
+    echo -en " 
 \E[1;33;44m
-Faild to insert TBS drivers into the build system.
+Failed to insert TBS drivers to the build system
 
 Aborting...
 \E[0m
 
 "
-  exit 1
+    exit 1
+}
+
+# Add TBS drivers to the build system
+cp -f v4l/* ../media_build/v4l/
+
+if [ "$?" -eq 1 ]; then
+  drivers
 fi
 
 cp -f dvb-frontends/* ../media_build/linux/drivers/media/dvb-frontends/
 
 if [ "$?" -eq 1 ]; then
-  echo -en "
-\E[1;33;44m
-Faild to insert TBS drivers into the build system.
-
-Aborting...
-\E[0m
-
-"
-  exit 1
+  drivers
 fi
 
 mkdir -p ../media_build/linux/drivers/media/common/saa716x
 cp -f saa716x/* ../media_build/linux/drivers/media/common/saa716x/
 
 if [ "$?" -eq 1 ]; then
-echo -en "
-\E[1;33;44m
-Faild to insert TBS drivers into the build system.
-
-Aborting...
-\E[0m
-
-"
-exit 1
+  drivers
 fi
 
 sed -i "$ a\
@@ -61,15 +50,7 @@ tbs62x1fe-objs += kmem_wrap.o tbs62x1fe_driver.o" ../media_build/linux/drivers/m
 cd ../media_build && patch -p1 < ../tbs-v4l/kconfig_patch && cd ../tbs-v4l
 
 if [ "$?" -eq 1 ]; then
-  echo -en "
-\E[1;33;44m
-Faild to insert TBS drivers into the build system.
-
-Aborting...
-\E[0m
-
-"
-  exit 1
+  drivers
 fi
 
 # Compile prep

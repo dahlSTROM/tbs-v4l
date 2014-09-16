@@ -225,6 +225,22 @@ Bad option to --failsafe '$failsafe_opt'.  Should be 'yes' or 'no'
   fi
 fi
 
+# Check that the default gcc/g++ version matches the one the running kernel was built with
+
+CCSYSTEM=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1,2 )
+CCKERNEL=$( cat /proc/version | awk '{ print $7 }' | cut -d'.' -f1,2 )
+
+if ! [ "$CCSYSTEM" = "$CCKERNEL" ] ; then
+  echo -en "
+\E[1;33;44m
+Your kernel is not compiled with your system's default
+gcc/g++ version. It is advised to switch to the version
+your kernel is built with. (gcc-$CCKERNEL)
+\E[0m
+
+"
+exit 0
+fi
 
 # Pull and prepare the v4l sources
 cd .. && rm -rf media_build && git clone git://git.linuxtv.org/media_build.git

@@ -234,12 +234,12 @@ if ! [ "$CCSYSTEM" = "$CCKERNEL" ] ; then
   echo -en "
 \E[1;33;44m
 Your kernel is not compiled with your system's default
-gcc/g++ version. It is advised to switch to the version
-your kernel is built with. (gcc-$CCKERNEL)
+gcc/g++ version (gcc-$CCSYSTEM). It is advised to switch to
+the version your kernel is built with (gcc-$CCKERNEL).
 \E[0m
 
 "
-exit 0
+  exit 0
 fi
 
 # Pull and prepare the v4l sources

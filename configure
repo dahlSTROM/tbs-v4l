@@ -28,7 +28,10 @@ show_help(){
   echo "                        Don't use this option unless you"
   echo "                        exactly know what you are doing."
   echo "                        "
-  echo " --tbs=<opt>            [yes] no: Don't use TBS drivers."
+  echo " --tbs=<opt>            [628] compile only 6281/6285 drivers."
+  echo "                        6680: compile only 6680 drivers."
+  echo "                        all: compile for both 6680 and 6281/6285." 
+  echo "                        no: Don't use TBS drivers."
   echo "                        "
   echo " --dvbdev=<opt>         [yes] no: Don't patch dvbdev.c."
   echo "                        no also sets --ffdecsabuild=no"
@@ -57,7 +60,7 @@ Unknown option \"$1\"
 
 # Set default options
 ffdecsa_build="yes"
-tbs_opt="yes"
+tbs_opt="628"
 dvbdev_opt="yes"
 failsafe_opt="yes"
 adapters_opt="8"
@@ -186,11 +189,11 @@ Bad option to --ffdecsabuild '$ffdecsa_build'.  Should be 'yes' or 'no'
   fi
 fi
 
-if test "x$tbs_opt" = "xno" || test "x$tbs_opt" = "xyes"; then
+if test "x$tbs_opt" = "xno" || test "x$tbs_opt" = "xall" || test "x$tbs_opt" = "x628" || test "x$tbs_opt" = "x6680"; then
   if ! [ "$?" -eq 0 ]; then
     echo -en "
 \E[1;33;44m
-Bad option to --tbs '$tbs_opt'.  Should be 'yes' or 'no'
+Bad option to --tbs '$tbs_opt'.  Should be 'all', 'no', '6680' or '628'
 \E[0m
 
 "
@@ -284,16 +287,58 @@ fi
 cd ../tbs-v4l
 
 # Add TBS drivers to build system (stage three)
-if test "x$tbs_opt" = "xyes"; then
+if test "x$tbs_opt" = "xall"; then
   echo -en "
 \E[1;33;44m
-Adding TBS drivers to the build system
+Adding all supported TBS drivers to the build system
 \E[0m
 
 "
   sleep 2
   cd ../tbs-v4l
   ./add-tbs-drivers
+  if ! [ "$?" -eq 0 ]; then
+    drivers
+  else
+    echo -en "
+\E[1;33;44m
+Done, no errors reported
+\E[0m
+
+"
+    sleep 2
+  fi
+elif test "x$tbs_opt" = "x628"; then
+  echo -en "
+\E[1;33;44m
+Adding 6281/6285 TBS drivers to the build system
+\E[0m
+
+"
+  sleep 2
+  cd ../tbs-v4l
+  ./add-tbs-drivers-6281-6285
+  if ! [ "$?" -eq 0 ]; then
+    drivers
+  else
+    echo -en "
+\E[1;33;44m
+Done, no errors reported
+\E[0m
+
+"
+    sleep 2
+  fi
+elif test "x$tbs_opt" = "x6680"; then
+  echo -en "
+\E[1;33;44m
+Adding 6680 TBS drivers to the build system
+\E[0m
+
+"
+  sleep 2
+  cd ../tbs-v4l
+  ./add-tbs-drivers-6680
   if ! [ "$?" -eq 0 ]; then
     drivers
   else

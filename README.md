@@ -4,9 +4,13 @@ rm -rf v4linstall && mkdir v4linstall && cd v4linstall
 
 git clone https://github.com/bas-t/tbs-v4l.git && cd tbs-v4l
 
-./configure --failsafe=no --adapters=16
+./configure --failsafe=no --adapters=16 --tbs=all
 
-This will compile supported tbs drivers using today's v4l branch and having done that, compile FFdecsawrapper against it.
+This will compile all supported tbs drivers using today's v4l branch and having done that, compile FFdecsawrapper against it.
+
+If you want to compile only 6680 drivers, use --tbs=6680.
+
+If you only want 6281/6285 drivers, just don't use the --tbs= option. It is the default behaviour.
 
 If you compile without the --failsafe option, you will be using a known working v4l tree from june first 2014.
 

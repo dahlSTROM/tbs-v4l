@@ -315,7 +315,7 @@ I can revert the switch at the end of the build.
       CCCHANGE="1"
       if ! dpkg-query -l g++-$CCKERNEL | grep "ii" > /dev/null 2>&1; then
         echo "
-Missing dependency patchutils, marking for installation.
+Missing dependency g++-$CCKERNEL, marking for installation.
 "
         apt-get install g++-$CCKERNEL -y || die "Error installing dependency g++-$CCKERNEL"
       fi

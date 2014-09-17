@@ -295,7 +295,7 @@ CCSYSTEM=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.'
 CCKERNEL=$( cat /proc/version | awk '{ print $7 }' | cut -d'.' -f1,2 )
 OLDCC="$CCSYSTEM"
 
-export $OLDCC
+export OLDCC
 
 if ! [ "$CCSYSTEM" = "$CCKERNEL" ] ; then
   if [ "$OS" = Debian -o "$OS" = Ubuntu ] ; then

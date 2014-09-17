@@ -13,81 +13,23 @@ Aborting...
   exit 0
 fi
 
-# Show help message
-show_help(){
-  echo "                        "
-  echo " Usage: ./configure --opt1=<opt> --opt2=<opt>"
-  echo "                        "
-  echo " Options: [default], if any, in brackets after option."
-  echo "                        "
-  echo " --help                 Print this message"
-  echo "                        "
-  echo " --ffdecsabuild=<opt>   [yes] no: Don't build FFdecsawrapper"
-  echo "                        "
-  echo " --ffdecsaconf=<bool>   Use own FFdecsawrapper options"
-  echo "                        Don't use this option unless you"
-  echo "                        exactly know what you are doing."
-  echo "                        "
-  echo " --tbs=<opt>            [628] compile only 6281/6285 drivers."
-  echo "                        6680: compile only 6680 drivers."
-  echo "                        all: compile for both 6680 and 6281/6285." 
-  echo "                        no: Don't use TBS drivers."
-  echo "                        "
-  echo " --dvbdev=<opt>         [yes] no: Don't patch dvbdev.c."
-  echo "                        no also sets --ffdecsabuild=no"
-  echo "                        "
-  echo " --failsafe=<opt>       [yes] Use known working v4l tree"
-  echo "                        from the first of june 2014"
-  echo "                        no: use today's v4l tree"
-  echo "                        "
-  echo " --adapters=<opt>       [8] Set max number of adapters"
-  echo "                        "
-  exit 0
-}
-
-# Show failure message
-die_unknown(){
-  echo -en "
-\E[1;33;44m
-Unknown option \"$1\"
-\E[0m
+die(){
+    echo -en "
+\E[1;33;44m$1, aborting...\E[0m
 
 "
-  sleep 5
-  ./configure --help
-  exit 1
+    exit 1
 }
 
-# Set default options
-ffdecsa_build="yes"
-tbs_opt="628"
-dvbdev_opt="yes"
-failsafe_opt="yes"
-adapters_opt="8"
+die_unknown(){
+    echo -en "
+\E[1;33;44mUnknown option \"$1\".\E[0m
 
-# Set options from command line
-for opt do
-  optval="${opt#*=}"
-  case "$opt" in
-  --ffdecsabuild=*) ffdecsa_build="$optval"
-  ;;
-  --ffdecsaconf=*) ffdecsa_conf="$optval"
-  ;;
-  --tbs=*) tbs_opt="$optval"
-  ;;
-  --dvbdev=*) ffdecsa_build="no"; dvbdev_opt="$optval"
-  ;;
-  --failsafe=*) failsafe_opt="$optval"
-  ;;
-  --adapters=*) adapters_opt="$optval"
-  ;;
-  --help) show_help
-  ;;
-  *)
-  die_unknown $opt
-  ;;
-  esac
-done
+"
+    sleep 3
+    ./configure --help
+    exit 1
+}
 
 confirmyes(){
     # call with a prompt string or use a default
@@ -176,6 +118,86 @@ Aborting...
     exit 1
 }
 
+# Show help message
+show_help(){
+  echo "                        "
+  echo " Usage: ./configure --opt1=<opt> --opt2=<opt>"
+  echo "                        "
+  echo " Options: [default], if any, in brackets after option."
+  echo "                        "
+  echo " --help                 Print this message"
+  echo "                        "
+  echo " --ffdecsabuild=<opt>   [yes] no: Don't build FFdecsawrapper"
+  echo "                        "
+  echo " --ffdecsaconf=<bool>   Use own FFdecsawrapper options"
+  echo "                        Don't use this option unless you"
+  echo "                        exactly know what you are doing."
+  echo "                        "
+  echo " --tbs=<opt>            [628] compile only 6281/6285 drivers."
+  echo "                        6680: compile only 6680 drivers."
+  echo "                        all: compile for both 6680 and 6281/6285." 
+  echo "                        no: Don't use TBS drivers."
+  echo "                        "
+  echo " --dvbdev=<opt>         [yes] no: Don't patch dvbdev.c."
+  echo "                        no also sets --ffdecsabuild=no"
+  echo "                        "
+  echo " --failsafe=<opt>       [yes] Use known working v4l tree"
+  echo "                        from the first of june 2014"
+  echo "                        no: use today's v4l tree"
+  echo "                        "
+  echo " --adapters=<opt>       [8] Set max number of adapters"
+  echo "                        "
+  exit 0
+}
+
+
+# Set default options
+ffdecsa_build="yes"
+tbs_opt="628"
+dvbdev_opt="yes"
+failsafe_opt="yes"
+adapters_opt="8"
+
+# Set options from command line
+for opt do
+  optval="${opt#*=}"
+  case "$opt" in
+  --ffdecsabuild=*) ffdecsa_build="$optval"
+  ;;
+  --ffdecsaconf=*) ffdecsa_conf="$optval"
+  ;;
+  --tbs=*) tbs_opt="$optval"
+  ;;
+  --dvbdev=*) ffdecsa_build="no"; dvbdev_opt="$optval"
+  ;;
+  --failsafe=*) failsafe_opt="$optval"
+  ;;
+  --adapters=*) adapters_opt="$optval"
+  ;;
+  --help) show_help
+  ;;
+  *)
+  die_unknown $opt
+  ;;
+  esac
+done
+
+confirmyes(){
+    # call with a prompt string or use a default
+    read -r -p "${1:-Are you sure? [Y/n]} " response
+    case $response in
+        [yY][eE][sS]|[yY]) 
+            true
+            ;;
+        [nN][oO]|[nN])
+            false
+            ;;
+        *)
+            true
+            ;;
+    esac
+}
+
 # Check for incorrect use of options, except --ffdecsaconf (that's an "experts only" opt)
 if test "x$ffdecsa_build" = "xno" || test "x$ffdecsa_build" = "xyes"; then
   if ! [ "$?" -eq 0 ]; then
@@ -225,17 +247,89 @@ Bad option to --failsafe '$failsafe_opt'.  Should be 'yes' or 'no'
   fi
 fi
 
+if [ -f /usr/bin/lsb_release ]; then
+  OS=$( lsb_release -si )
+  RELEASE=$( lsb_release -sc )
+fi
+
+# Install build dependencies
+
+if [ "$OS" = Debian -o "$OS" = Ubuntu ] ; then
+  if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency build-essential, marking for installation.
+"
+    apt-get install build-essential -y || die "Error installing dependency build-essential"
+  fi
+  if uname -a | egrep 'Debian|Ubuntu' > /dev/null  2>&1; then
+    if ! dpkg-query -l linux-headers-`uname -r` | grep "ii" > /dev/null 2>&1; then
+      echo "
+Missing dependency linux-headers-`uname -r`, marking for installation.
+"
+      apt-get install linux-headers-`uname -r` -y  || die "Error installing dependency linux-headers-`uname -r`"
+    fi
+  fi
+  if ! dpkg-query -l libproc-processtable-perl | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency libproc-processtable-perl, marking for installation.
+"
+    apt-get install libproc-processtable-perl -y || die "Error installing dependency libproc-processtable-perl"
+  fi
+  if ! dpkg-query -l patch | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency patch, marking for installation.
+"
+    apt-get install patch -y || die "Error installing dependency patch"
+  fi
+  if ! dpkg-query -l patchutils | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency patchutils, marking for installation.
+"
+    apt-get install patchutils -y || die "Error installing dependency patchutils"
+  fi
+fi
+
 # Check that the default gcc/g++ version matches the one the running kernel was built with
 
 CCSYSTEM=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1,2 )
 CCKERNEL=$( cat /proc/version | awk '{ print $7 }' | cut -d'.' -f1,2 )
+OLDCC="$CCSYSTEM"
+
+export $OLDCC
 
 if ! [ "$CCSYSTEM" = "$CCKERNEL" ] ; then
+  if [ "$OS" = Debian -o "$OS" = Ubuntu ] ; then
+    CCCHANGE="0"
+    echo -en "
+\E[1;33;44m
+Your kernel is not compiled with your system's default
+gcc/g++ version (gcc-$CCSYSTEM). It is advised to switch
+to the version your kernel is built with (gcc-$CCKERNEL).
+Do you want me to make that switch? If you want to,
+I can revert the switch at the end of the build.
+\E[0m
+
+"
+      confirmyes "Yes, please do![Y/n]"
+    if [ "$?" -eq 0 ]; then
+      CCCHANGE="1"
+      if ! dpkg-query -l g++-$CCKERNEL | grep "ii" > /dev/null 2>&1; then
+        echo "
+Missing dependency patchutils, marking for installation.
+"
+        apt-get install g++-$CCKERNEL -y || die "Error installing dependency g++-$CCKERNEL"
+      fi
+      ./gcc-version $CCKERNEL
+    fi
+  fi
+else
   echo -en "
 \E[1;33;44m
 Your kernel is not compiled with your system's default
 gcc/g++ version (gcc-$CCSYSTEM). It is advised to switch to
 the version your kernel is built with (gcc-$CCKERNEL).
+
+Aborting...
 \E[0m
 
 "
@@ -448,6 +542,20 @@ That is not a problem, but you have to reboot when done!!!
   fi
 
 cd ../tbs-v4l
+
+if [ "$CCCHANGE" -eq "1" ]; then
+    echo -en "
+\E[1;33;44m
+Do you want me to revert your system's default
+gcc version to it's original state? (gcc-$OLDCC)
+\E[0m
+
+"
+  confirmyes "Yes, revert it! [Y/n]"
+  if [ "$?" -eq 0 ]; then
+    ./gcc-version $OLDCC
+  fi
+fi
 
 # Pull in FFdecsawrapper, configure and compile it
 if test "x$ffdecsa_build" = "xyes"; then

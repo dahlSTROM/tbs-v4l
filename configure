@@ -321,9 +321,8 @@ Missing dependency g++-$CCKERNEL, marking for installation.
       fi
       ./gcc-version $CCKERNEL
     fi
-  fi
-else
-  echo -en "
+  else
+    echo -en "
 \E[1;33;44m
 Your kernel is not compiled with your system's default
 gcc/g++ version (gcc-$CCSYSTEM). It is advised to switch to
@@ -333,7 +332,8 @@ Aborting...
 \E[0m
 
 "
-  exit 0
+    exit 0
+  fi
 fi
 
 # Pull and prepare the v4l sources

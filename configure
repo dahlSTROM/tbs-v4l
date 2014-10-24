@@ -147,6 +147,10 @@ show_help(){
   echo "                        "
   echo " --adapters=<opt>       [8] Set max number of adapters"
   echo "                        "
+  echo " --gcc=<opt>            [auto] Automatically use the gcc version"
+  echo "                        that best suits your running kernel"
+  echo "                        or set it like --gcc=4.7"
+  echo "                        "
   exit 0
 }
 
@@ -157,6 +161,7 @@ tbs_opt="628"
 dvbdev_opt="yes"
 failsafe_opt="yes"
 adapters_opt="8"
+gcc_opt="auto"
 
 # Set options from command line
 for opt do
@@ -173,6 +178,8 @@ for opt do
   --failsafe=*) failsafe_opt="$optval"
   ;;
   --adapters=*) adapters_opt="$optval"
+  ;;
+  --gcc=*) gcc_opt="$optval"
   ;;
   --help) show_help
   ;;
@@ -289,18 +296,20 @@ Missing dependency patchutils, marking for installation.
   fi
 fi
 
-# Check that the default gcc/g++ version matches the one the running kernel was built with
 
-CCSYSTEM=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1,2 )
-CCKERNEL=$( cat /proc/version | awk '{ print $7 }' | cut -d'.' -f1,2 )
-OLDCC="$CCSYSTEM"
+if [ "x$gcc_opt" = "xauto" ]; then
+  # Check that the default gcc/g++ version matches the one the running kernel was built with
 
-export OLDCC
+  CCSYSTEM=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1,2 )
+  CCKERNEL=$( cat /proc/version | awk '{ print $7 }' | cut -d'.' -f1,2 )
+  OLDCC="$CCSYSTEM"
 
-if ! [ "$CCSYSTEM" = "$CCKERNEL" ] ; then
-  if [ "$OS" = Debian -o "$OS" = Ubuntu ] ; then
-    CCCHANGE="0"
-    echo -en "
+  export OLDCC
+
+  if ! [ "$CCSYSTEM" = "$CCKERNEL" ] ; then
+    if [ "$OS" = Debian -o "$OS" = Ubuntu ] ; then
+      CCCHANGE="0"
+      echo -en "
 \E[1;33;44m
 Your kernel is not compiled with your system's default
 gcc/g++ version (gcc-$CCSYSTEM). It is advised to switch
@@ -310,19 +319,19 @@ I can revert the switch at the end of the build.
 \E[0m
 
 "
-      confirmyes "Yes, please do![Y/n]"
-    if [ "$?" -eq 0 ]; then
-      CCCHANGE="1"
-      if ! dpkg-query -l g++-$CCKERNEL | grep "ii" > /dev/null 2>&1; then
-        echo "
+        confirmyes "Yes, please do![Y/n]"
+      if [ "$?" -eq 0 ]; then
+        CCCHANGE="1"
+        if ! dpkg-query -l g++-$CCKERNEL | grep "ii" > /dev/null 2>&1; then
+          echo "
 Missing dependency g++-$CCKERNEL, marking for installation.
 "
-        apt-get install g++-$CCKERNEL -y || die "Error installing dependency g++-$CCKERNEL"
+          apt-get install g++-$CCKERNEL -y || die "Error installing dependency g++-$CCKERNEL"
+        fi
+        ./gcc-version $CCKERNEL
       fi
-      ./gcc-version $CCKERNEL
-    fi
-  else
-    echo -en "
+    else
+      echo -en "
 \E[1;33;44m
 Your kernel is not compiled with your system's default
 gcc/g++ version (gcc-$CCSYSTEM). It is advised to switch to
@@ -332,8 +341,11 @@ Aborting...
 \E[0m
 
 "
-    exit 0
+      exit 0
+    fi
   fi
+else
+  gcc-version $gcc_opt
 fi
 
 # Pull and prepare the v4l sources
@@ -543,17 +555,19 @@ That is not a problem, but you have to reboot when done!!!
 
 cd ../tbs-v4l
 
-if [ "$CCCHANGE" -eq "1" ]; then
-    echo -en "
+if [ "x$gcc_opt" = "xauto" ]; then
+  if [ "$CCCHANGE" -eq "1" ]; then
+      echo -en "
 \E[1;33;44m
 Do you want me to revert your system's default
 gcc version to it's original state? (gcc-$OLDCC)
 \E[0m
 
 "
-  confirmyes "Yes, revert it! [Y/n]"
-  if [ "$?" -eq 0 ]; then
-    ./gcc-version $OLDCC
+    confirmyes "Yes, revert it! [Y/n]"
+    if [ "$?" -eq 0 ]; then
+      ./gcc-version $OLDCC
+    fi
   fi
 fi
 

@@ -345,7 +345,7 @@ Aborting...
     fi
   fi
 else
-  gcc-version $gcc_opt
+  ./gcc-version $gcc_opt
 fi
 
 # Pull and prepare the v4l sources
